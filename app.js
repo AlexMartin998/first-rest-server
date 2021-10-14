@@ -57,12 +57,21 @@
 		- Query Params: Los que se pasan con   ?   en la url en un GET
 			- Los recuperamos con:   req.query
 				- Es conveniente hacer una Destructuring para poder establecer valores por default en caso de que no me pasen.
-			- 
-		
-		- 
-		- 
 	
-	- 
+	- Desplegar nuestro REST Server a produccion
+		- Establecer el script   "start": "node app.js"		en el package.json
+		- Subirlo a GitHub > Vincularlo a Heroku
+		- Provar la API con Postman del REST Server en produccion 
+
+	- Pro Tip: Ambiente de producción y desarrollo en Postman:
+		- Nos permite generar variables de entorno
+			- Para utilizar el mismo TAB y trabajar con la API en produccion y en development
+				- Enviroment > Agregar > name > url inicial > ctrl + s
+				- Con esto en el TAB abierto utilizo el enviroment:
+						{{name}}/api/users
+								- Pero solo va a funcionar si seleccionamos en Envirment de la
+									parte superior derech. Asi cambiamos, seleccionando y tal
+		-
 
  * 
  * 
