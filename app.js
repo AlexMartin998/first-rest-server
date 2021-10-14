@@ -71,11 +71,6 @@
 						{{name}}/api/users
 								- Pero solo va a funcionar si seleccionamos en Envirment de la
 									parte superior derech. Asi cambiamos, seleccionando y tal
-		-
-
- * 
- * 
- * 
  */
 
 console.clear();
