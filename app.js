@@ -168,8 +168,9 @@ serverModel.listen();
 			 - await User.findByIdAndDelete(id)  <- SI elimina el user de la DB
 
 	- Desplgar REST Server en Heroku
+		- No vamos a poder consumir la API desplegada por algo de seguridad. Toca esperar a terminar la S10 para que funcione.
 		- Actualizar el repo en GitHub y actualizar en Heroku, como en la S8
-		
+
 	- Variables de entorno personalizadas Heroku
 	  - No subir el  .env  a GitHub 
 			- Dejar de darle seguimiento en Git
@@ -177,10 +178,26 @@ serverModel.listen();
 						git add .
 						git commit .....
 
-			- 
+			- Creamos un archivo q si se vaya a subir:  .example.env
+			  - Suele tener solo la key de lo que deberia tener
+			- Ahora, en Heroku debemos configurar las variables de entorno:
+			  - Desde el dashboard: 
+				  - deployed > setting > Cnofig Vars > Ponemos la kew y el value
+				- Desplegar nuevamenete el proyecto
+				  deployed > Deploy > Deploy Branch
+				- 
 	  - 
  */
 
+	
+	
+	
+	
+	
+	
+	
+	
+		
 // -------------------------------------------------------------------
 //////////////////////////////////////////////////////////////////////
 /** S8: REST Server
