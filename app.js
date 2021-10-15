@@ -169,6 +169,16 @@ serverModel.listen();
 
 	- Desplgar REST Server en Heroku
 		- Actualizar el repo en GitHub y actualizar en Heroku, como en la S8
+		
+	- Variables de entorno personalizadas Heroku
+	  - No subir el  .env  a GitHub 
+			- Dejar de darle seguimiento en Git
+						git rm .env --cached
+						git add .
+						git commit .....
+
+			- 
+	  - 
  */
 
 // -------------------------------------------------------------------
