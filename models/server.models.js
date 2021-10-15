@@ -4,12 +4,16 @@ const express = require('express');
 const { PORT } = require('../config');
 const cors = require('cors');
 const { usersRoutes } = require('../routes');
+const { dbConnection } = require('../db/config.db.js');
 
 class Server {
   constructor() {
     this.app = express();
     this.port = PORT;
     this.usersRoutePath = '/api/users';
+
+    // Connect to DB
+    this.connectToDB();
 
     // Middlerares
     this.middlewares();
@@ -18,11 +22,15 @@ class Server {
     this.routes();
   }
 
+  async connectToDB() {
+    await dbConnection();
+  }
+
   middlewares() {
     // Cors
     this.app.use(cors());
 
-    // Read and parse of body
+    // Reading and parsing the body
     this.app.use(express.json());
 
     // Static directory

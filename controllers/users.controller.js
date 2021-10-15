@@ -1,44 +1,80 @@
 'use strict';
 
 const { response, request } = require('express');
+const User = require('../models/user.model.db.js');
+const bcryptjs = require('bcryptjs');
 
-const getUsers = (req = request, res = response) => {
-  const { q, name = 'No name', apikey } = req.query;
+const getUsers = async (req = request, res = response) => {
+  const { from = 0, limit = 5 } = req.query;
+  const activeUsers = { state: true };
+
+  const [total, users] = await Promise.all([
+    User.countDocuments(activeUsers),
+    User.find(activeUsers)
+      .skip(+from)
+      .limit(+limit),
+  ]);
 
   res.json({
-    name,
-    q,
     msg: 'Read - GET  |  Controller',
-    apikey,
+    total,
+    users,
   });
 };
 
-const postUser = (req, res = response) => {
-  const { name, age, os } = req.body;
+const postUser = async (req, res = response) => {
+  const { name, mail, password, role } = req.body;
+  const user = new User({ name, mail, password, role });
+
+  // Encrypt
+  const salt = bcryptjs.genSaltSync(); // complejidad del hash, 10 x default
+  user.password = bcryptjs.hashSync(password, salt);
+
+  // Save in DB
+  await user.save();
 
   return res.status(201).json({
-    name,
-    age,
-    os,
     msg: 'Create - POST  |  Controller',
+    user,
   });
 };
 
-const updateUser = (req = request, res = response) => {
-  const id = req.params.id;
-  console.log({ id });
+const updateUser = async (req = request, res = response) => {
+  const { id } = req.params;
+  const {
+    _id,
+    password: newPassword,
+    google,
+    mail,
+    role,
+    ...restData
+  } = req.body;
 
-  res.json({
-    name: 'Alex',
-    msg: 'Update - PUT  |  Controller',
-  });
+  if (newPassword) {
+    const salt = bcryptjs.genSaltSync();
+    restData.password = bcryptjs.hashSync(newPassword, salt);
+  }
+
+  const updatedUser = await User.findByIdAndUpdate(id, restData);
+
+  res.json(updatedUser);
 };
 
-const deleteUser = (req, res = response) =>
+const deleteUser = async (req = request, res = response) => {
+  const { id } = req.params;
+
+  // // 1. Physically delete  -  Not recommended
+  // const userDeleted = await User.findByIdAndDelete(id);
+
+  // // 2. Change user state in DB
+  const userDeleted = await User.findByIdAndUpdate(id, { state: false });
+
   res.json({
-    name: 'Alex',
     msg: 'Delete - DELETE  |  Controller',
+    id,
+    userDeleted,
   });
+};
 
 module.exports = {
   getUsers,
