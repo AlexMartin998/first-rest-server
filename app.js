@@ -172,6 +172,7 @@ serverModel.listen();
 		- Actualizar el repo en GitHub y actualizar en Heroku, como en la S8
 
 	- Variables de entorno personalizadas Heroku
+	  - Haciendo esto ya funciono el REST Server desde heroku
 	  - No subir el  .env  a GitHub 
 			- Dejar de darle seguimiento en Git
 						git rm .env --cached
@@ -185,7 +186,9 @@ serverModel.listen();
 				  - deployed > setting > Cnofig Vars > Ponemos la kew y el value
 				- Desplegar nuevamenete el proyecto
 				  deployed > Deploy > Deploy Branch
-				- 
+
+			- Desde el CLI de Heroku
+			 - 
 	  - 
  */
 
