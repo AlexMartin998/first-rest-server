@@ -65,13 +65,11 @@ const deleteUser = async (req = request, res = response) => {
 
   // // 1. Physically delete  -  Not recommended
   // const userDeleted = await User.findByIdAndDelete(id);
-
   // // 2. Change user state in DB
   const userDeleted = await User.findByIdAndUpdate(id, { state: false });
 
   res.json({
     msg: 'Delete - DELETE  |  Controller',
-    id,
     userDeleted,
   });
 };

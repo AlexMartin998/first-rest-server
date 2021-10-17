@@ -1,20 +1,25 @@
 'use strict';
 const router = require('express').Router();
 const { check } = require('express-validator');
+
+const {
+  validateFields,
+  validateJWT,
+  isAdmin,
+  hasUserRole,
+} = require('./../middlewares');
+
+const {
+  isRoleValid,
+  isAlreadyRegistered,
+  userIdExist,
+} = require('../helpers/db-validators.js');
 const {
   getUsers,
   postUser,
   updateUser,
   deleteUser,
 } = require('../controllers/users.controller.js');
-const {
-  validateFields,
-} = require('../middlewares/validate-fields.middleware.js');
-const {
-  isRoleValid,
-  emailExist,
-  userIdExist,
-} = require('../helpers/db-validators.js');
 
 router.post(
   '/',
@@ -25,7 +30,7 @@ router.post(
       'The password must be longer than 6 characters.'
     ).isLength({ min: 6 }),
     check('mail', 'The email is not valid.').isEmail(),
-    check('mail').custom(emailExist),
+    check('mail').custom(isAlreadyRegistered),
     // check('role', 'The role is not valid.').isIn(['ADMIN_ROLE', 'USER_ROLE']),
     check('role').custom(isRoleValid),
     validateFields,
@@ -34,6 +39,7 @@ router.post(
 );
 
 router.get('/', getUsers);
+
 router.put(
   '/:id',
   [
@@ -43,9 +49,13 @@ router.put(
   ],
   updateUser
 );
+
 router.delete(
   '/:id',
   [
+    validateJWT,
+    // isAdmin,
+    hasUserRole('ADMIN_ROLE', 'ANY_OTHER_ROLE'),
     check('id', 'ID is not valid mongoID').isMongoId(),
     check('id').custom(userIdExist),
     validateFields,

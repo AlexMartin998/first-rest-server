@@ -20,6 +20,154 @@ serverModel.listen();
 */
 // -------------------------------------------------------------------
 //////////////////////////////////////////////////////////////////////
+/** S10: Autenticacion de usuario - JWT
+ * Introduccion a los Tokens
+	- Token: Los protegemos con una encriptacion de doble via. Facil desencriptarlos.
+	  - Por esto NO grabar informacion sensible: Passwors, id, etc.
+		- Un token se componer por 3 partes:
+				- Header: Tiene información del algoritmo utilizado para la encriptación junto con el tipo de token, en este caso JWT.
+				- Payload: Contiene la Información que nosotros queremos que esté en el token. Aunque parezca que está encriptado es muy fácil obtener ese código.
+				- Firma: Da información a los verificadores del JWT si ese JWT es válido.
+	
+	- Informacion importante sobre los JWT
+	  - Los token se almacenan en el Local Storage
+			- Lo q se almacene en el Local Storage es totalmente manipulable por el client
+			- Con lo cual lo va a poder modificar, por eso nuestro back debe validar q no haya sido modificado. Para esto, la Firma es lo mas importante.
+			- f(x) para desencritar un JWT: Porbar con  https://jwt.io/
+						function parseJwt (token) {
+							var base64Url = token.split('.')[1];
+							var base64 = base64Url.replace('-', '+').replace('_', '/');
+							return JSON.parse(window.atob(base64));
+						};
+						
+	- Crear ruta autenticación - Auth - Login
+	  - El login va a ser un POST request. <--  Enviamod data (email & password)
+	  - En el server.models.js: agregamos la ruta en el method  routes()
+		  	this.app.use(this.authPath, authRoutes);
+				- Esto es como lo q haciamos en el index con el de la Biblia de node, pero aqui en las Class del server en el model.
+		- Luego creamos el nuevo modulo route para el autho
+			- En el vamos a tener el resto del path, los middlewares y el controller.
+		- Luego creamos su controller
+
+	- Login de usuarios: Ya es hora de hacer la Autenticacion de Usuarios con JWT
+	  - Solo tener un  res.json()  por f(x) en el controller
+		- Validar el password: bcryptjs.compareSync() devuelve un Boolean si hace match
+		  - bcryptjs.compareSync(aComparar, conQVoyAComparar)
+				const validPassword = bcryptjs.compareSync(password, user.password);
+	
+	- Generar un JWT:     npm i jsonwebtoken
+    - No retorna una Promise, sino que un Callback, x eso creamos un f(x) q retorne una promise
+		  - En el helper generate-jwt.js: 
+			  - El user._id pasa a ser el  uid
+				- Grabamos el uid del user en el payload del token, aqui NO grabar info sensible.
+			- Generar el JWT: En el helper generate-jwt.js
+			  - Firmar el jwt:
+				  jwt.sign(payload, secretOrPrivateKey, [options, callback])
+						- payload: Pues el payload :v, lo q queremos grabar
+						- secretOrPrivateKey: Llave secreta q si alguin la llega a conocer va a poder firmar tokens como si nuestro backend lo hubiera hecho. Esto es algo que debemos colocar como VARIABLE DE ENTORNO.
+						- options: Podemos establecer el tiempo de vigencia del jwt. Object
+						  - expireIn: 'tiempoDeVigencia'
+						- callback: Se dispara con un error y el token como 2do parametro.
+			  - Hasta aqui ya tenemos un login basico.
+				  - El token No lo vamos a guardar en la DB
+					- Cuando se requiera una accion que requiera estar autenticado, vamos a pedir el token para saber si es correcto y el q nosotros firmamos.
+
+	- Cambiar visualmente  _id  por  uid  en Mongoose
+		- Trabajsmos en el user.model.db.js: Solo hacemos esto :v
+		  - Destructuring el _id, y como el dataUser es un Object, pues creamos la propiedad  uid  con el value _id que extrajimos:
+					UserSchema.methods.toJSON = function () {
+						const { __v, password, _id, ...dataUser } = this.toObject();
+						dataUser.uid = _id;
+						return dataUser;
+					};
+
+	-  Proteger rutas mediante uso de Token - Middlewares
+		1. Proteger la ruta del Delete. Primera validacion q x lo menos tenga un token valido.
+			- Proteger 1 ruta: crear un middleware personalizado en su carpeta respectiva
+			  - Middlewares > creamos    validate-jwt.middleware.js
+				  - Los JWT de acceso van en los headers
+					  - Recuperamos el token q envian en los headers:
+  									const token = req.header('key');
+											- key deve ser la mima que envian desde el front
+				  - Creamos la f(x) validateJWT en el   validate-jwt.middleware.js
+							- Como es un middleware que valida el token, debe ir Primero en el Arr del  delete  en el users.routes.js
+							- Ya que si da erro NO pasara al resto de middlewares
+						- Validamos el JWT: Si da err lanza un trhow new Error
+							- Por lo cual utilizamos un    trycatch
+							- Usamos el  jsw.verify(token, secretOrPublicKey, options)
+								- token: Es el que nos envian en los headers desde el front
+								- secret...: La Variable de Entorno que cree para firmar el token
+							- Como en el helper   generate-jwt.js   guarde el   uid en paylod, la verificacion al ser true me devuelve lo guardado en el payload. Asi que lo almacenamos en una constante
+							- Creamos una nueva property/key en la   req   con ese  uid recuperado en el   .verify()
+			- En la proxima clases vamos a hacer q el Delete solo funcione si es un ADMIN, y tiene el token valido q ya configuramos aqui.
+
+	- Obtener la informacion del usuario autenticado
+	  - Verificar que el usuario autenticado (usuario logueado, q logro hacer login) esta activo. Esto xq si el state es false, pues esta eliminado en nuestra app.
+					
+		- En las proximas clases vamos a usar ese JWT para validar ROLES de Usuarios.
+		- Proceso:
+		  - Creamos un nuevo usuario (validaciones)
+			- Hacemos Login con el POST enviando email & pass (validaciones)
+			  - Si pasa las validaciones hace login y se le asigan un JWT
+					- Con lo cual ya pasa a ser un Authenticated User (AU)
+			- Verificar que sea un AU / Usuario logueado para que pueda hacer algo que requiera ser un AU: 
+			  Ejemplo con el Delete:
+			  - Validamos si envia un token en los headers
+				- Como el token es el  uid  del user q hizo login, se valida:
+				  - Si existe el  uid  en la DB:
+					  - SI existe, se valida q el  State  del user q tiene un token valido / hizo login:
+							- true: Recien aqui se valida q sea un Authenticated User (AU)
+								- Ahora si podria hacer el delete
+							- false: El user existe en DB pero su state es false
+								- NO tiepe permisos de AU
+					- Si NO existe, pues nisiquiera es un user :v
+		
+	- Middleware: Verificar Rol de administrador
+	 	- Creamo el middleware personalizado   validate-role.middleware.js
+			- Este middleware FUERZA/OBLIGA a q sea un Admin el q haga algo en el endpoint.
+	 	  - Validamos que se haya validado el usuario autenticado
+			   - Con esta validacion necesitamos que, en el User Route, este middleware este Despues del q valida el JWT xq en este ultimo apregamos el AU a la req q estamos utilizando en este middleware para validar el role de Admin.
+
+	- Middleware: Tiene rol
+	  - Con este middleware el usuario con el Role que especifiquemos como parametro podra hacer lo que quiere en el end point/route que tiene dicho middleware.
+		  - Mas flexible. Si tiene este rol o tal ves este otro, puedes hacer algo en este endpoint.
+		- Creamos la f(x) hasUserRole() para enviar como parametro el role que deseamos, siempre que sea valido en la db. Crear en el middleware de validate-role
+			- Pasar argumentos a un Middleware personalizado:
+			  - Debe ser una f(x) re reciba esos Argumentos y que Retorne una f(x) con req, res, next. Es decir, una f(x) normal de todo middleware personalizado.
+							return (req = request, res = response, next) => {
+								.......
+								next();
+							}
+			- Como comparamos el role q se me envia como parametro con el rol del AU, este middleware debe ejecutarse despues del q Valida el JWT.
+			  		req.authenticatedUser.role
+
+	- Optimizaciones importantes en Node
+		- Crear la Variable de entorno del privateOrSecretKey en Heroku <- Firmar nuestros tokens.
+		- Desplegar en GitHub
+		- 
+			- 
+		- 
+	
+	- 
+	- 
+ * 
+ * 
+ */
+
+/* 
+
+
+
+
+
+
+
+
+
+
+*/
+// -------------------------------------------------------------------
+//////////////////////////////////////////////////////////////////////
 /** S9: Alcances del RESTServer y mantenimiento de la colección de usuarios
  * Alcances del proyecto REST Server
 	- Instalaciones:   npm i cors express dotenv mongoose
@@ -188,10 +336,22 @@ serverModel.listen();
 				  deployed > Deploy > Deploy Branch
 
 			- Desde el CLI de Heroku
-			 - 
-	  - 
+				- Subir el proyecto a Heroku
+					- Configurar el  package.json  <--  "start": "node app.js"
+					- Vamos a https://dashboard.heroku.com/apps > New > New App > Name > Create App > Heroku CLI
+						- En el directorio de la app a desplegar:
+									heroku login
+									heroku git:remote -a nameApp
+									git push heroku brachName
+				- Establecer las variables de entonrno en Heroku
+				  - En el directorio de la app
+						- Ver las variables de entorno:    heroku config
+						- Crear 1:			heroku config:set key='value'
+						- Eliminar 1:		heroku config:unset key
+						- Si cambio algo, volvemos a subir a github y a heroku
+									git push heroku brachName	
  */
-
+/* 
 	
 	
 	
@@ -200,7 +360,7 @@ serverModel.listen();
 	
 	
 	
-		
+*/
 // -------------------------------------------------------------------
 //////////////////////////////////////////////////////////////////////
 /** S8: REST Server
