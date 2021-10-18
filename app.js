@@ -97,6 +97,10 @@ serverModel.listen();
 		
 	- Publicar a Heroku - Google SignIn
 	  - Crear las variables de entorno en heroku
+		- Modificar la url del front HTML
+		- En el cosole no se q de google agregar el dominio en donde esta desplegada la app en produccion: Adejabo de localhost y tal
+			https://console.cloud.google.com/apis/credentials/oauthclient/960448950637-ji8l0jp2ignc98cp8fil283tv2sc6f50.apps.googleusercontent.com?project=curso-node-fh-329414&supportedpurview=project
+
 		- Actualizar github
 		- Subir a heroku
  */
