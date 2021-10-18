@@ -10,7 +10,7 @@ const {
 } = require('./../middlewares');
 
 const {
-  isRoleValid,
+  isValidRole,
   isAlreadyRegistered,
   userIdExist,
 } = require('../helpers/db-validators.js');
@@ -32,7 +32,7 @@ router.post(
     check('mail', 'The email is not valid.').isEmail(),
     check('mail').custom(isAlreadyRegistered),
     // check('role', 'The role is not valid.').isIn(['ADMIN_ROLE', 'USER_ROLE']),
-    check('role').custom(isRoleValid),
+    check('role').custom(isValidRole),
     validateFields,
   ],
   postUser

@@ -5,6 +5,7 @@ const User = require('../models/user.model.db.js');
 const bcryptjs = require('bcryptjs');
 
 const getUsers = async (req = request, res = response) => {
+  // Basic pagination
   const { from = 0, limit = 5 } = req.query;
   const activeUsers = { state: true };
 

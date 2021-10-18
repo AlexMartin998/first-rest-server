@@ -20,6 +20,101 @@ serverModel.listen();
 */
 // -------------------------------------------------------------------
 //////////////////////////////////////////////////////////////////////
+/** S11: Google Sign In - Front y BackEnd
+ * Generar API Key y API Secret de Google
+  - Google Identity: https://developers.google.com/identity/gsi/web/guides/overview
+	  - Vamos aqui: 
+		https://developers.google.com/identity/gsi/web/guides/get-google-api-clientid
+			- Luego a Google APIs console: Debemos tener una cuenta
+				- Create new project > Name > Crear
+				  - Selecionamos ese project > Pantall de consentimiento
+					  - Interno: Solo para la organizacino
+						- Externo: Para todos los q tiene cuenta de Google
+					> Seleccionamos Externo > Llenamos el formulario d lo q le va a aparecer al que quira hacer sign in en nuestra app con su google account.
+					> Guardar y continuar Hasta el final, luego puede editar el resto > Volver al Panel >  
+					Credenciales > Crear credenciales > Crear ID de cliente OAuth > 
+					  - Name > Origenes autorizados de JS: 
+							- Devel: http://localhost   &   http://localhost:PORT
+							> Guardar
+					- Nos da 1 ID Client (visible para el user) y un Secret cliente (back)
+				- Creamos la variable de entorno con ese ID Client
+
+	- Usuario de Google - Frontend
+	  - Vamos al HTML q tenemos en la carpeta public y colocamos lo q necesitamos
+		  - Display the Sign In With Google button:
+			  - Copiamos el codigo y lo pegamos en nuestro HTML.
+				- Eliminamos el data-atribute:   data-login_uri  xq asi vamos a tener mas control desde nuestro back.
+			- Handle credential responses with JavaScript functions:
+			  - copiamos y pegamos: data-callback="handleCredentialResponse"
+				- Luego la f(x) y la dejamos como un f(x) normal.
+				  - El   response.credential   ya es el Google token o ID token
+					  - Con esto vamos a crar un user en nuestro back.
+	  - Ahora ya tenemos el ID Token de Google, y con ese ID vamos a crear un User en nuestro back.
+
+  - Ruta para manejar autenticación de Google
+    - Creamos el POST reques en el auth.routes.js
+		  - el path va a ser:  /google
+			- El   controller:   googleSignIn
+		- Desde el front envio el id_token con un fetch con method 'POST' xq asi esta configurado el back (route).
+		  - Ese  id_token  lo envio desde el front xq lo recupero de la f(x) de google: 
+			  const body = { id_token: response.credential };
+				  - Lo envio en formato JSON 
+	
+  - Validar Token de Google - Backend: Actualizado a Google Identity
+	  - Verify the Google ID token on your server side:
+			- npm install google-auth-library --save
+					- verifyIdToken()
+			- Copiamos todo el codigo para Node en un helper en nuestro vscode
+				- El modulo se llama:  google-verify.js
+				- Requiere de nuestro GOOGLE_CLIENT_ID del  .env
+				- Restructuramos lo que necesitamos del payload de google.
+					const { name, picture, email } = ticket.getPayload();
+				- Retornamos un Object con lo que necesitemos y la key q esta en nuestro User Schema.
+			- Lo q retorno el helper lo recibimos en el googleSignIn del controller personalizado. 
+			
+	- Crear un usuario personalizado con las credenciales de Google
+	  - Estamos haciendo el Sig-in: En donde puden pasar 2 cosas:
+		  - 1. El usuario no esta registrado (no lo tenemos en DB)
+				- Con lo cual, lo registramos y hace login (adquiere un JWT firmado x nuestro back) /AU. Tal cual nuestro proceso manual en el back, solo q ahora con un solo click y con google :v
+			- 2. Existe en nuestra DB, pero el state: false
+				- NO lo dejamos hacer login/AU 
+	  - Si se disparaba el catch al intentar el  .save()   
+			POST http://localhost:3300/api/auth/google 400 (Bad Request)
+			es xq No se esta enviando un role "valido", no envio nada, pero toma como empty string y mi back valida como uno q no esta en los roles validos.
+			  - SOLUCION: 
+				  - 1. En el data incluir el role q quiero
+					- 2. En el user model dejar un role por default
+
+  - Logout - Google Identity
+	  - Podriamos cerrar sesion borrando las cookies :v
+		- Lo que si debemos hacer es: En el HTML <- Desde el Front
+		  - Cuando estamos autenticados con Google tenemos acceso a: google.accounst
+			  -  console.log(google.accounts.id);
+				  - Y en el id tenemos acceso al disableAutoSelect() q siempre debemos ejecutarlo.
+					- revoke(email, cb)
+					  - email lo obtenemos del localStorage <- resp.user.mail  q es lo q configure q devuelva el back al hacer Sign In con la f(x) googleSignIn del auth cotroller.
+			  - Luego eliminamos el email del localStorage y recargamos la pagina.
+		
+	- Publicar a Heroku - Google SignIn
+	  - Crear las variables de entorno en heroku
+		- Actualizar github
+		- Subir a heroku
+ */
+
+/* 
+
+
+
+
+
+
+
+
+
+
+*/
+// -------------------------------------------------------------------
+//////////////////////////////////////////////////////////////////////
 /** S10: Autenticacion de usuario - JWT
  * Introduccion a los Tokens
 	- Token: Los protegemos con una encriptacion de doble via. Facil desencriptarlos.

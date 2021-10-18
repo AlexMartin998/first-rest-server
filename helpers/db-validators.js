@@ -8,7 +8,7 @@ const isAlreadyRegistered = async (mail = '') => {
   if (emailExist) throw new Error(`Email ${mail} is already registered.`);
 };
 
-const isRoleValid = async (role = '') => {
+const isValidRole = async (role = '') => {
   const roleExist = await Role.findOne({ role });
   if (!roleExist)
     throw new Error(`The role: ${role} is not valid in this app.`);
@@ -20,7 +20,7 @@ const userIdExist = async id => {
 };
 
 module.exports = {
-  isRoleValid,
+  isValidRole,
   isAlreadyRegistered,
   userIdExist,
 };
