@@ -29,11 +29,15 @@
     <button class="google-logout">Log out</button>
 
     <script>
+      var url = window.location.hostname.includes('localhost')
+        ? 'http://localhost:3300/api/auth/google'
+        : 'https://first-basic-rest-server-alx.herokuapp.com/api/auth/google';
+
       function handleCredentialResponse(response) {
         // Google token / ID token:
         const body = { id_token: response.credential };
 
-        fetch('http://localhost:3300/api/auth/google', {
+        fetch(url, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
