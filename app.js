@@ -20,6 +20,67 @@ serverModel.listen();
 */
 // -------------------------------------------------------------------
 //////////////////////////////////////////////////////////////////////
+/** S12: Categorias y productos
+ * Continuacion del proyecto REST Server
+	- CRUD y rutas de Categorias
+    - Categories: 
+		  - Creamos todos los end points de un CRUD / REST API basico   <--   routes
+
+	- Modelo Category
+	  - Crear una referencia hacia otro Schema en el Model:
+			- Debemos considerar el type y el ref
+			  - type: Del tipo Schema
+				- ref: 'SchemaName'
+								user: {
+									type: Schema.Types.ObjectId,
+									ref: 'User'
+								},
+					El  ref  debe ser el mimo SchemaName q se le puso en el  model('SchemaName', Schema)  del Schema al q se hace referencia.
+
+	- Create new category
+	  - Empezamos x el post para explicarles como crear manteniendo la ref al User.
+    - user: req.authenticatedUser._id  <-- En la data q guardo en MongoDB
+		  - Debe ser un usuario de mongo, de lo contrario no funcionaria.
+		  - Esto funciona xq en el Router 1ro estoy validandoJWT q crea la propiedad/key authenticatedUser en la req. Si no se ejecuta antes, deberiamos hacer algo para tener acceso al user. 
+
+	- Modelo de producto y rutas
+	  - Hacer un CRUD para productos
+
+	- Ruta para realizar busquedas
+	  - Realizar busquedas en nuestra DB
+		  - Crear 1 unico end point / Route
+			  - Las peticiones de busqueda suelen ser GET y los argumentos se pasan por la URL.
+
+	- Busqueda en DB
+	  - Queremos que sea flexible, por eso permitiremos que el front envie o el name, email o el ID.
+		  - ID: Debemos verificar que sea un ID de Mongo valido: ObjectId.isValid(query)
+			- Name and Email: Con una expresion regular para q envio todo lo q haga match.
+	  -
+
+	- Buscar en otras colecciones
+	  - Si refactorizo el codigo separando la comprobacion del mongoID me da error y non se xq. Fernando tiene el mismo codigo en los 3 :v
+		- Si quire realizar busqueda de productos por vategoria debo usar el Object ID
+		  - {category: ObjectId('616f4c17cfa204556dc910a1')}
+	
+	- Desplegar a Heroku
+	  - 
+	
+ */
+
+/*
+
+
+
+
+
+
+
+
+
+
+*/
+// -------------------------------------------------------------------
+//////////////////////////////////////////////////////////////////////
 /** S11: Google Sign In - Front y BackEnd
  * Generar API Key y API Secret de Google
   - Google Identity: https://developers.google.com/identity/gsi/web/guides/overview
@@ -35,6 +96,7 @@ serverModel.listen();
 					Credenciales > Crear credenciales > Crear ID de cliente OAuth > 
 					  - Name > Origenes autorizados de JS: 
 							- Devel: http://localhost   &   http://localhost:PORT
+							- Production: dominio.tls  en el q va a estar deplegado el project
 							> Guardar
 					- Nos da 1 ID Client (visible para el user) y un Secret cliente (back)
 				- Creamos la variable de entorno con ese ID Client
@@ -67,9 +129,9 @@ serverModel.listen();
 			- Copiamos todo el codigo para Node en un helper en nuestro vscode
 				- El modulo se llama:  google-verify.js
 				- Requiere de nuestro GOOGLE_CLIENT_ID del  .env
-				- Restructuramos lo que necesitamos del payload de google.
-					const { name, picture, email } = ticket.getPayload();
-				- Retornamos un Object con lo que necesitemos y la key q esta en nuestro User Schema.
+				- Destructuring de lo q necesitamos del payload de google.
+					  const { name, picture, email } = ticket.getPayload();
+				- Retornamos un Object con lo que necesitemos y la key q esta en nuestro User Schema <- DB - mongoose.
 			- Lo q retorno el helper lo recibimos en el googleSignIn del controller personalizado. 
 			
 	- Crear un usuario personalizado con las credenciales de Google
@@ -92,17 +154,25 @@ serverModel.listen();
 			  -  console.log(google.accounts.id);
 				  - Y en el id tenemos acceso al disableAutoSelect() q siempre debemos ejecutarlo.
 					- revoke(email, cb)
-					  - email lo obtenemos del localStorage <- resp.user.mail  q es lo q configure q devuelva el back al hacer Sign In con la f(x) googleSignIn del auth cotroller.
+					  - email lo obtenemos del   localStorage <- resp.user.mail     q es lo q configure q devuelva el back al hacer Sign In con la f(x) googleSignIn del auth cotroller.
 			  - Luego eliminamos el email del localStorage y recargamos la pagina.
 		
 	- Publicar a Heroku - Google SignIn
 	  - Crear las variables de entorno en heroku
 		- Modificar la url del front HTML
-		- En el cosole no se q de google agregar el dominio en donde esta desplegada la app en produccion: Adejabo de localhost y tal
+		- En el console no se q de google agregar el dominio en donde esta desplegada la app en produccion: Adejabo de localhost y tal
 			https://console.cloud.google.com/apis/credentials/oauthclient/960448950637-ji8l0jp2ignc98cp8fil283tv2sc6f50.apps.googleusercontent.com?project=curso-node-fh-329414&supportedpurview=project
 
 		- Actualizar github
 		- Subir a heroku
+	
+  - Pro Tip: Generar la documentación automática de nuestros servicios
+	  - Tener una cuenta en Postman 
+		- Collection > Clic en los 3 puntos > View documentation > Language: En el que estemos trabajado: JS con fetch. etc.
+		  - Editamos como creamos conveniente
+		> Click en el engrane: Configurar algo si queremos
+		> Publish > Abre el navegador > Aceptar o algo asi :v  >  Ver el enlace publico a la documentacion.
+
  */
 
 /* 
@@ -243,14 +313,6 @@ serverModel.listen();
 	- Optimizaciones importantes en Node
 		- Crear la Variable de entorno del privateOrSecretKey en Heroku <- Firmar nuestros tokens.
 		- Desplegar en GitHub
-		- 
-			- 
-		- 
-	
-	- 
-	- 
- * 
- * 
  */
 
 /* 

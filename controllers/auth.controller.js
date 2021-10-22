@@ -65,7 +65,7 @@ const googleSignIn = async (req = request, res = response) => {
 
     res.json({
       msg: 'OK papu',
-      id_token,
+      // id_token,
       user,
       token,
     });
