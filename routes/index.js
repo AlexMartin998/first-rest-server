@@ -4,4 +4,5 @@ module.exports = {
   categoriesRouter: require('./categories.routes.js'),
   productsRouter: require('./products.routes.js'),
   searchRouter: require('./search.routes.js'),
+  uploadRouter: require('./uploads.routes.js'),
 };

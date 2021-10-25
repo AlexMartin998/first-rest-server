@@ -1,14 +1,17 @@
 'use strict';
 
 const express = require('express');
-const { PORT } = require('../config');
 const cors = require('cors');
+const fileUpload = require('express-fileupload');
+
+const { PORT } = require('../config');
 const {
   usersRoutes,
   authLoginRoutes,
   categoriesRouter,
   productsRouter,
   searchRouter,
+  uploadRouter,
 } = require('../routes');
 const { dbConnection } = require('../db/config.db.js');
 
@@ -23,6 +26,7 @@ class Server {
       users: '/api/users',
       products: '/api/products',
       search: '/api/search',
+      uploads: '/api/uploads',
     };
 
     // Connect to DB
@@ -48,6 +52,15 @@ class Server {
 
     // Static directory
     this.app.use(express.static('public'));
+
+    // Upload file
+    this.app.use(
+      fileUpload({
+        useTempFiles: true,
+        tempFileDir: '/tmp/',
+        createParentPath: true,
+      })
+    );
   }
 
   routes() {
@@ -56,6 +69,7 @@ class Server {
     this.app.use(this.paths.categories, categoriesRouter);
     this.app.use(this.paths.products, productsRouter);
     this.app.use(this.paths.search, searchRouter);
+    this.app.use(this.paths.uploads, uploadRouter);
   }
 
   listen() {

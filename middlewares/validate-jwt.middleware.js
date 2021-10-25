@@ -2,6 +2,7 @@
 
 const { request, response } = require('express');
 const jwt = require('jsonwebtoken');
+
 const { SECRETORPRIVATEKEY } = require('../config');
 const User = require('../models/user.model.db.js');
 

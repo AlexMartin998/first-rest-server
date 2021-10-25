@@ -20,6 +20,111 @@ serverModel.listen();
 */
 // -------------------------------------------------------------------
 //////////////////////////////////////////////////////////////////////
+/** S13: Carga de Archivos y proteccion de los mismos
+ * Continuacion del proyecto REST Server
+	- Continuando el REST Server
+	  - Si quiero subir un archivo significa que voy a crear un nuevo recurso. Con lo cual usamos POST.
+		
+	- Subir / Cargar archivos
+		- Hacer las validaciones nosotros. El ensena lo nuevo, q es cargar archivos.
+		- npm i express-fileupload
+				- Repo con example: https://github.com/richardgirges/express-fileupload/blob/master/example/server.js
+				- Como es un middleware a la hora de usarlo, lo voy a colocar en el Server.model xq pueden hacer otras routes q requieran subir archivos.
+				- En Postman Body > from-data > key <- file/text > value <- Seleccionamos el archivo > send
+					- Y si hacemos un clg del    req.files    obtendremos la un Obj del file enviado con su key y cierta info del mismo.
+				- Si enviamos 1 solo archivo podemos hacer un   drag and drop   en el front, para que al sultar se dispare la peticion con ese archivo.
+		- Ya podemos subir archivos a nuestro server, pero AUN NOO podemos servirlos. XQ el path en el q se almacenan dentro del server No es un path valido <- es un un endpoint.
+
+	- Validar la Extension
+	  - Creamos un Arr de extensiones permitidas, luego verificamos q la extension del archivo q suben este en el arr.
+		  - Probar con Expresiones regulares lo de las extensiones permitidas
+
+	- Ubicar y cambiar el nombre
+	  - Darle un identificador unico: UUID
+		  npm i uuid
+
+	- Helper uploadFile
+	  - Refactorizamos el codigo con un helper:
+		  - Cuando esperamos hacer algo que salga bien o mal y trabajar con el req y res
+			  - Retornamos una promesa y trabajamos con el  resolve and  reject
+			-- No me gusto que puedan enviar la extension, no se si sea inseguro ;v <- Averiguar
+
+	- Crear carpetas de destino
+	  - createParentPath <-- express-fileupload 
+		  - Es peligroso xq no sabemos en donde se esta guardando
+		- Si un folder esta vacio, GIT NO le va a dar seguimiento. Crear un readme.md
+		- En la sig clase vamos a crear endpoints para cargar imagenes de perfil a los user
+
+	- Ruta para actualizar imágenes de Usuarios y Productos
+	  - Creamos el end point para el update <- PUT.
+		  - Vamos a utilizar una f(x) q reciba argumentos en el custom:
+    check('collection').custom(c => allowedCollections(c, ['users', 'products'])),
+			- En el helper debemos retornar algo, en este caso:  return true
+		- En alguna etapa del curso hice lo mismo, pero de otra forma :v <- revisar
+
+	- Actualizar imagen de usuario
+		- Con el Put, y el nombre lo colocamos en la property img del Schema.
+		
+	- Resolucion de la tarea - Destructurar de undefined
+	  - Crear un Middleware para validar q se este enviando el archivo. Esto lo usamos en cada endpoint/route en la q se lo necesite.
+
+	- Borrar archivos del servidor
+	  - Eliminamos las imagenes previas. Para que solo quede 1 img
+		  - Construimos el path
+			- Verificamos que el path exista
+			- Eliminamos dicha img
+		- Todavia NO podemos servir las img que se suben, eso en la proxima clase.
+
+	- Servicio para mostrar las imagenes.
+	  - Con un GET en el   route  
+		- Asi tambien protegemos la imagen, porque no da informacion sobre en donde esta el recurso en nuestro server.
+		  - Podriamos cargarlas a un ruta como   /api/uploads/img/users   y servirla en una ruta como   /api/images/users
+
+	- Mostrar img de relleno
+	  - Creamos el path y la servimos con un   res.sendFile('path')   tal como en la calse pasada.
+		- Heroku:
+			- No almacena las img, las borra despues de un tiempo para q el codigo funcione perfectamente. Y como medida de seguridad.
+			- Para almacenar imgs y trabajar con Heroku debemos utilizar un hosting de imgs de terceros, x ejemplo: Cloudinary.
+			- Es combeniente subir todos los archivos a otro servidor aparte, para asi proteger el codigo fuente.
+		- Si despliegas un servidor linux (VPS, dedicated server) no tendrias problemas cno las img y demas contenido multimedia, pero con Heroku si debemos externalizar este alojamiento de imgs.
+
+
+	- Cloudinary - Servicio para imágenes y videos
+	  - Crear cuenta:
+		  - Como estamos en devel del back vamos a utilizar el API Environment variable
+			  - Creamos una variable de entorno en el    .env   con esa API
+		- Instalamos el paquete npm:
+	 			 npm install cloudinary
+
+	- Carga de imagenes a Cloudinary
+	  - La f(x)  updateImgCloudinary   es la q utilizaremos, la anterior es para guardar en el servidor mismo. Y esta es para cargarlas a un servidor aparte.
+		- Como al enviar un file a nuestro server se le asigna un   tempFilePath   vamos a utilizarlo para cargarlo directamente en Cloudinary, y NO en nuestro server.
+		   verlo:  console.log(req.file.keyInPostman)
+		- Destructuring del secure_url y eso le metemos al model: model.img = secure_url
+
+	- Borrar las imagenes de Cloudinary
+	  - Como solo guardamos el path de la img, del mismo debemos sacar el ID de la img cargada para luego poder borrarla.
+		- Ya con el public_id de la img simplemente hacemos un   cloudinary.uploader.destroy(public_id);
+
+	- Desplegar en Heroku
+	  - 
+
+ */
+
+/* 
+
+
+
+
+
+
+
+
+
+
+*/
+// -------------------------------------------------------------------
+//////////////////////////////////////////////////////////////////////
 /** S12: Categorias y productos
  * Continuacion del proyecto REST Server
 	- CRUD y rutas de Categorias

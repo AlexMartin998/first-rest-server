@@ -2,3 +2,5 @@ node_modules/
 notesApp.js
 
 .env
+
+uploads/*[!.md]

@@ -6,7 +6,7 @@ const Product = require('./../models/product.model.db.js');
 const createProduct = async (req = request, res = response) => {
   const { name, category } = req.body;
 
-  const alreadyExist = await Product.findOne({ name });
+  // const alreadyExist = await Product.findOne({ name });
 
   // if (alreadyExist)
   //   return res.status(400).json({ msg: `Product: ${name} alreade exist` });

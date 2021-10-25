@@ -10,7 +10,7 @@ const createCategory = async (req = request, res = response) => {
 
   if (categoryExist)
     return res.status(400).json({
-      msg: `Catecogy ${name} already exists in DB`,
+      msg: `Category ${name} already exists in DB`,
     });
 
   const data = {

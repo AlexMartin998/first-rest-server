@@ -60,6 +60,14 @@ const alreadyExist = async (name = '') => {
   if (nameExist) throw new Error(`Ename ${name} is already registered.`);
 };
 
+// allowed collections
+const allowedCollections = (collection = '', collections = []) => {
+  const isIncluded = collections.includes(collection);
+  if (!isIncluded) throw new Error(`Collection ${collection} is not allowed!`);
+
+  return true;
+};
+
 module.exports = {
   isValidRole,
   isAlreadyRegistered,
@@ -72,4 +80,6 @@ module.exports = {
   productExist,
   isProductActive,
   alreadyExist,
+
+  allowedCollections,
 };
